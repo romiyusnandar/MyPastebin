@@ -145,6 +145,11 @@ app.get('/:id', (req, res) => {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/dracula.min.css">
     <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
       body {
         font-family: 'Roboto', sans-serif;
         margin: 0;
@@ -183,6 +188,7 @@ app.get('/:id', (req, res) => {
         font-size: 14px;
         text-decoration: none;
         transition: background-color 0.3s;
+        box-sizing: border-box;
       }
       .btn:hover {
         background-color: #26386f;
@@ -253,7 +259,7 @@ app.get('/:id', (req, res) => {
     <div class="container">
       <h1>Orion Paste</h1>
       <div class="header">
-        <h2>Paste: ${id}</h2>
+        <p>Paste: ${id}</p>
         <div>
           <a class="btn back-btn" href="/">Back</a>
           <button id="btn-copy" class="btn copy-btn" onclick="copyToClipboard()">Copy</button>
