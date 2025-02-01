@@ -187,42 +187,42 @@ app.post('/paste', (req, res) => {
   const id = crypto.randomBytes(3).toString('hex');
   pastes[id] = { content, createdAt: new Date(), views: 0 };
   scheduleExpiration(id);
-  const pasteUrl = `${req.protocol}://${req.get('host')}/${id}`;
+  const pasteUrl = `https://paste-orion.vercel.app/${id}`;
   res.json({ url: pasteUrl, id: id });
 });
 
 // Jalankan HTTP server
-const server = http.createServer(app);
-server.listen(PORT, () => {
+// const server = http.createServer(app);
+app.listen(PORT, () => {
   console.log(`HTTP server berjalan di port ${PORT}`);
 });
 
 // ---
 // TCP Server untuk menerima upload via terminal
-net.createServer((socket) => {
-  let dataBuffer = '';
+// net.createServer((socket) => {
+//   let dataBuffer = '';
 
-  socket.on('data', (chunk) => {
-    dataBuffer += chunk.toString();
-  });
+//   socket.on('data', (chunk) => {
+//     dataBuffer += chunk.toString();
+//   });
 
-  socket.on('end', () => {
-    if (dataBuffer.trim()) {
-      const id = crypto.randomBytes(3).toString('hex');
-      pastes[id] = { content: dataBuffer, createdAt: new Date() };
-      scheduleExpiration(id);
-      const pasteUrl = `https://paste.orionos.vercel.app:${PORT}/${id}`; // Sesuaikan jika perlu
-      socket.write(`Paste tersedia di: ${pasteUrl}\n`);
-    }
-    socket.end();
-  });
+//   socket.on('end', () => {
+//     if (dataBuffer.trim()) {
+//       const id = crypto.randomBytes(3).toString('hex');
+//       pastes[id] = { content: dataBuffer, createdAt: new Date() };
+//       scheduleExpiration(id);
+//       const pasteUrl = `https://paste.orionos.vercel.app:${PORT}/${id}`; // Sesuaikan jika perlu
+//       socket.write(`Paste tersedia di: ${pasteUrl}\n`);
+//     }
+//     socket.end();
+//   });
 
-  socket.on('error', (err) => {
-    console.error('Error pada socket:', err);
-  });
-}).listen(TCP_PORT, () => {
-  console.log(`TCP server berjalan di port ${TCP_PORT}`);
-});
+//   socket.on('error', (err) => {
+//     console.error('Error pada socket:', err);
+//   });
+// }).listen(TCP_PORT, () => {
+//   console.log(`TCP server berjalan di port ${TCP_PORT}`);
+// });
 
 // Fungsi untuk meng-escape HTML agar karakter khusus tidak dieksekusi
 function escapeHtml(text) {
