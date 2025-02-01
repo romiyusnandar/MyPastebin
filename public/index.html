@@ -96,7 +96,35 @@
     #result a:hover {
       text-decoration: underline;
     }
+    .msg {
+      font-size: 14px;
+    }
+    .curl-command {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #282a36;
+      border-radius: 4px;
+      border-left: 4px solid #ff79c6;
+    }
+    .curl-command p {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 14px;
+      color: #f8f8f2;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .curl-command .highlight {
+      color: #ff79c6;
+      font-weight: bold;
+    }
     @media (max-width: 600px) {
+      .curl-command {
+        font-size: 11px;
+      }
+      .msg {
+        font-size: 14px;
+      }
       .container {
         padding: 0.5rem;
       }
@@ -127,9 +155,12 @@
         <button class="btn">Upload File</button>
         <input type="file" id="fileInput" accept=".txt,.js,.py,.java,.cpp,.c,.html,.css,.php,.rb,.go,.rs,.ts,.swift,.kt,.scala,.pl,.sh,.bat,.ps1,.sql,.xml,.json,.yaml,.md,.tex,.log,.conf,.ini,.cfg,.yml,.dmesg,.syslog,.journalctl,.logcat,.event,.access,.error,.debug,.audit,.messages,.kern,.boot,.daemon,.auth">
       </div>
-      <button class="btn submit-btn" onclick="submitPaste()">Submit Paste</button>
+      <button class="btn submit-btn" onclick="submitPaste()">Upload</button>
     </div>
-    <div id="result"></div>
+    <div class="curl-command">
+      <p><span class="highlight">curl command:</span> cat test.log | curl -X POST --data-binary @- https://paste-orion.vercel.app/paste</p>
+    </div>
+    <div id="result" class="msg"></div>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/codemirror.min.js"></script>
