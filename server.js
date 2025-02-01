@@ -47,7 +47,85 @@ app.get('/', (req, res) => {
 app.get('/:id', (req, res) => {
   const id = req.params.id;
   if (!pastes[id]) {
-    return res.status(404).send('Paste tidak ditemukan atau sudah kedaluwarsa.');
+  const html = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>MyPastebin - Paste Not Found</title>
+      <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+      <style>
+        body {
+          font-family: 'Roboto', sans-serif;
+          margin: 0;
+          padding: 0;
+          background-color: #282a36;
+          color: #f8f8f2;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          min-height: 100vh;
+        }
+        .container {
+          width: 90%;
+          max-width: 600px;
+          padding: 2rem;
+          background-color: #44475a;
+          border-radius: 8px;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          text-align: center;
+        }
+        h1 {
+          color: #ff5555;
+          margin-bottom: 1rem;
+          font-size: 2rem;
+        }
+        p {
+          margin-bottom: 1.5rem;
+        }
+        .btn {
+          display: inline-block;
+          padding: 10px 20px;
+          background-color: #6272a4;
+          color: #f8f8f2;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 14px;
+          text-decoration: none;
+          transition: background-color 0.3s;
+        }
+        .btn:hover {
+          background-color: #26386f;
+        }
+        @media (max-width: 480px) {
+          .container {
+            padding: 1rem;
+          }
+          h1 {
+            font-size: 1.5rem;
+          }
+          p {
+            font-size: 0.9rem;
+          }
+          .btn {
+            padding: 8px 16px;
+            font-size: 12px;
+          }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <h1>Paste Not Found</h1>
+        <p>The paste you're looking for doesn't exist or has expired.</p>
+        <a href="/" class="btn">Back to Home</a>
+      </div>
+    </body>
+    </html>
+  `;
+    return res.status(404).send(html);
   }
 
   // Increment view count
@@ -55,25 +133,38 @@ app.get('/:id', (req, res) => {
 
   // Render halaman HTML dengan kode, tombol copy, dan syntax highlighting
   const content = pastes[id].content;
+  const views = pastes[id].views;
   const html = `
   <!DOCTYPE html>
-  <html>
+  <html lang="en">
   <head>
     <meta charset="UTF-8">
-    <title>Paste ${id}</title>
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paste Id: ${id}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/dracula.min.css">
     <style>
       body {
+        font-family: 'Roboto', sans-serif;
         margin: 0;
         padding: 0;
-        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-        background-color: #252526;
-        color: #abb2bf;
+        background-color: #282a36;
+        color: #f8f8f2;
       }
       .container {
         max-width: 90%;
-        margin: 2rem auto;
+        margin: 1rem auto;
         padding: 1rem;
+        background-color: #44475a;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        text-align: center;
+        color: #8be9fd;
+        margin-bottom: 1rem;
+        font-size: 2rem;
       }
       .header {
         display: flex;
@@ -81,95 +172,144 @@ app.get('/:id', (req, res) => {
         align-items: center;
         margin-bottom: 1rem;
       }
-      .header h1 {
-        margin: 0;
-        font-size: 1.5rem;
-      }
       .btn {
-        padding: 8px 16px;
-        color: white;
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #6272a4;
+        color: #f8f8f2;
         border: none;
         border-radius: 4px;
         cursor: pointer;
         font-size: 14px;
         text-decoration: none;
-        transition: background-color 0.3s ease;
+        transition: background-color 0.3s;
+      }
+      .btn:hover {
+        background-color: #26386f;
       }
       .back-btn {
-        background-color: #0e639c;
-      }
-      .back-btn:hover {
-        background-color: #4fa8c9;
+        background-color: #6272a4;
       }
       .copy-btn {
-        background-color: #4CAF50;
+        background-color:rgb(15, 175, 55);
+        color: #282a36;
       }
       .copy-btn:hover {
-        background-color: #45a049;
+        background-color: #228443;
       }
-      .editor {
-        display: flex;
-        border: 1px solid #444;
+      .editor-container {
+        border: 1px solid #6272a4;
         border-radius: 4px;
         overflow: hidden;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
       }
-      .line-numbers {
-        background-color: #2c313c;
-        padding: 10px;
-        text-align: right;
-        color: #858585;
-        user-select: none;
+      .CodeMirror {
+        height: auto;
+        font-family: 'Fira Code', monospace;
         font-size: 14px;
-        line-height: 1.5;
-        white-space: pre;
+        line-height: 1.6;
       }
-      .code-container {
-        flex: 1;
-        background-color: #282c34;
-        padding: 10px;
-        overflow: auto;
+        .paste-info {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 1rem;
+          font-size: 0.9rem;
+          color: #bd93f9;
+        }
+        views {
+          display: flex;
+          align-items: center;
+        }
+        .views svg {
+          margin-right: 5px;
+        }
+      @media (max-width: 600px) {
+        .container {
+          padding: 0.5rem;
+        }
+        h1 {
+          font-size: 1.5rem;
+        }
+        .header {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        .btn {
+          width: 100%;
+          margin-bottom: 0.5rem;
+        }
+        .paste-info {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        .views {
+          margin-top: 0.5rem;
+        }
       }
-      pre {
-        margin: 0;
-      }
-      code {
-        font-size: 14px;
-        line-height: 1.5;
-        white-space: pre;
-      }
-      </style>
+    </style>
   </head>
   <body>
     <div class="container">
+      <h1>Orion Paste</h1>
       <div class="header">
-        <h1>Paste: ${id}</h1>
+        <h2>Paste: ${id}</h2>
         <div>
           <a class="btn back-btn" href="/">Back</a>
-          <button class="btn copy-btn" onclick="copyToClipboard()">Copy</button>
+          <button id="btn-copy" class="btn copy-btn" onclick="copyToClipboard()">Copy</button>
         </div>
       </div>
-      <div class="editor">
-        <div class="line-numbers" id="line-numbers"></div>
-        <div class="code-container" id="code-container">
-          <pre><code id="code-block" class="plaintext">${escapeHtml(content)}</code></pre>
-        </div>
+      <div class="paste-info">
+        <span>Created: ${new Date(pastes[id].createdAt).toLocaleString()}</span>
+        <span class="views">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+          ${views} view${views !== 1 ? 's' : ''}
+        </span>
+      </div>
+      <div class="editor-container">
+        <textarea id="code-area">${escapeHtml(content)}</textarea>
       </div>
     </div>
 
-    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
     <script>
-      hljs.highlightAll();
+      var editor = CodeMirror.fromTextArea(document.getElementById("code-area"), {
+        lineNumbers: true,
+        mode: "javascript",
+        theme: "dracula",
+        readOnly: true
+      });
 
       function copyToClipboard() {
-        const code = document.getElementById('code-block').innerText;
+        const code = editor.getValue();
+        const btnCopy = document.getElementById('btn-copy');
+
         navigator.clipboard.writeText(code).then(function() {
-          alert('Teks berhasil disalin!');
+          btnCopy.innerText = 'Copied!';
+          btnCopy.style.backgroundColor = '#50fa7b';
+          btnCopy.style.color = '#282a36';
+
+          setTimeout(() => {
+            btnCopy.innerText = 'Copy';
+            btnCopy.style.backgroundColor = '';
+            btnCopy.style.color = '';
+          }, 2000);
         }, function(err) {
-            alert('Gagal menyalin teks: ' + err);
-          });
-        }
-      </script>
+          console.error('Failed to copy text: ', err);
+          btnCopy.innerText = 'Error!';
+          btnCopy.style.backgroundColor = '#ff5555';
+
+          setTimeout(() => {
+            btnCopy.innerText = 'Copy';
+            btnCopy.style.backgroundColor = '';
+          }, 10000);
+        });
+      }
+    </script>
   </body>
   </html>
 `;
@@ -187,42 +327,14 @@ app.post('/paste', (req, res) => {
   const id = crypto.randomBytes(3).toString('hex');
   pastes[id] = { content, createdAt: new Date(), views: 0 };
   scheduleExpiration(id);
+  // const pasteUrl = `http://localhost:3000/${id}`;
   const pasteUrl = `https://paste-orion.vercel.app/${id}`;
   res.json({ url: pasteUrl, id: id });
 });
 
-// Jalankan HTTP server
-// const server = http.createServer(app);
 app.listen(PORT, () => {
   console.log(`HTTP server berjalan di port ${PORT}`);
 });
-
-// ---
-// TCP Server untuk menerima upload via terminal
-// net.createServer((socket) => {
-//   let dataBuffer = '';
-
-//   socket.on('data', (chunk) => {
-//     dataBuffer += chunk.toString();
-//   });
-
-//   socket.on('end', () => {
-//     if (dataBuffer.trim()) {
-//       const id = crypto.randomBytes(3).toString('hex');
-//       pastes[id] = { content: dataBuffer, createdAt: new Date() };
-//       scheduleExpiration(id);
-//       const pasteUrl = `https://paste.orionos.vercel.app:${PORT}/${id}`; // Sesuaikan jika perlu
-//       socket.write(`Paste tersedia di: ${pasteUrl}\n`);
-//     }
-//     socket.end();
-//   });
-
-//   socket.on('error', (err) => {
-//     console.error('Error pada socket:', err);
-//   });
-// }).listen(TCP_PORT, () => {
-//   console.log(`TCP server berjalan di port ${TCP_PORT}`);
-// });
 
 // Fungsi untuk meng-escape HTML agar karakter khusus tidak dieksekusi
 function escapeHtml(text) {
