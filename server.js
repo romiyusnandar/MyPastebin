@@ -29,7 +29,7 @@ const scheduleExpiration = (id) => {
   pastes[id].timeout = setTimeout(() => {
     console.log(`Paste ${id} expired.`);
     delete pastes[id];
-  }, 15 * 60 * 1000); // 15 menit
+  }, 24 * 60 * 60 * 1000); // 15 menit
 };
 
 // Aktifkan middleware untuk parsing body sebagai plain text
